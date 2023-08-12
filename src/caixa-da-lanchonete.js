@@ -1,7 +1,7 @@
 const cardapio = {
     cafe: {
         valor: 3.00,
-        tipo: 'principal'
+        principal: ''
     },
     chantily: {
         valor: 1.50,
@@ -11,7 +11,8 @@ const cardapio = {
         valor: 6.20
     }, 
     sanduiche: {
-        valor: 6.50
+        valor: 6.50,
+        principal: ''
     },
     queijo: {
         valor: 2.00, 
@@ -44,8 +45,6 @@ function calcularDescontoTaxa(metodoDePagamento, valorTotal){
     return precoFinal.toFixed(2)
 }
 
-
-
 // Função para verificar se existe algum item extra.
 function verificarItemExtra(item){
     return cardapio[item].hasOwnProperty('extra')
@@ -74,14 +73,11 @@ function validarItemPrincipal(listaDeItens, itemExtra){
             }
         })
     }
-
     return count > 0
 }
 
 
-//console.log(validarItemPrincipal([ [ 'chantily', 1 ], [ 'sanduiche', 1 ] ], 'chantily'))
-
-
+// função para calcular o valor total dos itens
 function calcularValorFinal(listaDeItens){
     let valorFinal = 0
     listaDeItens.forEach(item => {
@@ -91,53 +87,57 @@ function calcularValorFinal(listaDeItens){
     return parseFloat(valorFinal.toFixed(2))
 }
 
-
 class CaixaDaLanchonete {
 
     calcularValorDaCompra(metodoDePagamento, itens) {
         let resposta;
         let novaLista = []
 
-        
+    if(itens.length !== 0){
         if(validarFormaDePagamento(metodoDePagamento)){
-            if(itens.length !== 0){
-                itens.forEach(element => {
-                    let item = element.slice(0,element.length - 2)
-                    let quantidade = parseInt(element.charAt(element.length - 1))
-                    novaLista.push([item, quantidade])
-                    if(quantidade <= 0){
-                        resposta = "Quantidade inválida!"
-                    }else if((cardapio.hasOwnProperty(item)) === false){
-                        resposta = "Item inválido!"
+            itens.forEach(element => {
+                let item = element.slice(0,element.length - 2)
+                let quantidade = parseInt(element.charAt(element.length - 1))
+                novaLista.push([item, quantidade])
+
+                if(quantidade <= 0){
+                    resposta = "Quantidade inválida!"
+                }else if((cardapio.hasOwnProperty(item)) === false){
+                    resposta = "Item inválido!"
+                }else{
+                    if(verificarItemExtra(item)){
+                        if(validarItemPrincipal(novaLista, item)){
+                            let valorTotal = calcularDescontoTaxa(metodoDePagamento, calcularValorFinal(novaLista))
+                            resposta = `R$ ${valorTotal.toString().replace('.', ',')}`
+                        }else{
+                            resposta = "Item extra não pode ser pedido sem o principal";
+                        }
                     }else{
-                        if(verificarItemExtra(item)){
-                            console.log(item)
-                            if(validarItemPrincipal(novaLista, item)){
-                                let valorTotal = calcularDescontoTaxa(metodoDePagamento, calcularValorFinal(novaLista))
-                                resposta = `R$ ${valorTotal.toString().replace('.', ',')}`
-                            }else{
-                                resposta = "Item extra não pode ser pedido sem o principal"
+                        if(itens.length === 2){
+                            if((item === 'saunduiche' && itens.includes('chantily')) || ((item === 'cafe' && itens.includes('queijo')))){
+                                resposta = "Item extra não pode ser pedido sem o principal";
                             }
                         }else{
                             let valorTotal = calcularDescontoTaxa(metodoDePagamento, calcularValorFinal(novaLista))
                             resposta = `R$ ${valorTotal.toString().replace('.', ',')}`
-                            
                         }
                     }
-                });
-            }else{
-                resposta = "Não há itens no carrinho de compra!";
-            }
+                }
+            });
         }else{
             resposta = "Forma de pagamento inválida!"
         }
+    }else{
+        resposta = "Não há itens no carrinho de compra!"
+    } 
+
         return resposta;
     }
     
 }
 
 const resultado = new CaixaDaLanchonete()
-               .calcularValorDaCompra('debito', ['chantily,1', 'sanduiche,1']); // 'R$ 33,73'
+               .calcularValorDaCompra('dinheiro', ['chantily,1', 'sanduiche,1']); // 'R$ 33,73'
 
 console.log(resultado)    
 
