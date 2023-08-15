@@ -29,21 +29,19 @@ const cardapio = {
     }
 }
 // Função para calcular valor da taxa ou desconto, caso houver.
-function calcularDescontoTaxa(metodoDePagamento, valorTotal){
-    let precoFinal;
-    if(metodoDePagamento === 'dinheiro'){
-        let desconto;
-        desconto = valorTotal * (5 / 100) 
-        precoFinal = valorTotal - desconto
-    }else if (metodoDePagamento === 'credito'){
-        let acrescimo;
-        acrescimo = valorTotal * (3 / 100)
-        precoFinal = valorTotal + acrescimo
-    }else{
-        precoFinal = valorTotal
+function calcularDescontoTaxa(metodoDePagamento, valorTotal) {
+    let precoFinal = valorTotal;
+
+    if (metodoDePagamento === 'dinheiro') {
+        const desconto = valorTotal * 0.05; // 5% de desconto
+        precoFinal -= desconto;
+    } else if (metodoDePagamento === 'credito') {
+         const acrescimo = valorTotal * 0.03; // 3% de acréscimo
+        precoFinal += acrescimo;
     }
-    return precoFinal.toFixed(2)
+    return precoFinal.toFixed(2);
 }
+
 
 // Função para verificar se existe algum item extra.
 function verificarItemExtra(item){
@@ -77,7 +75,7 @@ function validarItemPrincipal(listaDeItens, itemExtra){
 }
 
 
-// função para calcular o valor total dos itens
+// função para calcular o valor total dos itens.
 function calcularValorFinal(listaDeItens){
     let valorFinal = 0
     listaDeItens.forEach(item => {
@@ -96,9 +94,10 @@ class CaixaDaLanchonete {
     if(itens.length !== 0){
         if(validarFormaDePagamento(metodoDePagamento)){
             itens.forEach(element => {
-                let item = element.slice(0,element.length - 2)
-                let quantidade = parseInt(element.charAt(element.length - 1))
-                novaLista.push([item, quantidade])
+                let indexVirgula = element.indexOf(',')
+                let item = element.slice(0,element.indexOf(','))
+                let quantidade = parseInt(element.slice(indexVirgula + 1))
+                novaLista.push([item, quantidade]) // cria uma nova lista de itens no formato: [['codigo', qtd]]
 
                 if(quantidade <= 0){
                     resposta = "Quantidade inválida!"
@@ -135,11 +134,6 @@ class CaixaDaLanchonete {
     }
     
 }
-
-const resultado = new CaixaDaLanchonete()
-               .calcularValorDaCompra('dinheiro', ['chantily,1', 'sanduiche,1']); // 'R$ 33,73'
-
-console.log(resultado)    
 
 
 export { CaixaDaLanchonete };
